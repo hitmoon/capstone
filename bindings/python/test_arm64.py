@@ -92,9 +92,9 @@ def test_class():
     f = open(FILE_read, "rb")
     CODE = f.read()
 
-    print("*" * 16)
+    print("*" * 32)
     print("Platform: %s" % "ARM-64")
-    #print("Code: %s" % to_hex(code))
+    print("Code size: %d" % len(CODE))
     print("Disasm:")
 
     try:

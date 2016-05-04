@@ -91,6 +91,8 @@ __all__ = [
     'CS_GRP_IRET',
 
     'CsError',
+
+    '__version__',
 ]
 
 # Capstone C interface
@@ -98,6 +100,8 @@ __all__ = [
 # API version
 CS_API_MAJOR = 3
 CS_API_MINOR = 0
+
+__version__ = "%s.%s" %(CS_API_MAJOR, CS_API_MINOR)
 
 # architectures
 CS_ARCH_ARM = 0
@@ -230,7 +234,7 @@ if _found == False:
 
 # Attempt Darwin specific load (10.11 specific),
 # since LD_LIBRARY_PATH is not guaranteed to exist
-if system() == 'Darwin':
+if (_found == False) and (system() == 'Darwin'):
     _lib_path = '/usr/local/lib/'
     for _lib in _all_libs:
         try:
@@ -319,8 +323,13 @@ class CsError(Exception):
     def __init__(self, errno):
         self.errno = errno
 
-    def __str__(self):
-        return _cs.cs_strerror(self.errno)
+    if _python2:
+        def __str__(self):
+            return _cs.cs_strerror(self.errno)
+
+    else:
+        def __str__(self):
+            return _cs.cs_strerror(self.errno).decode()
 
 
 # return the core's version
@@ -558,12 +567,12 @@ class CsInsn(object):
 
         attr = object.__getattribute__
         if not attr(self, '_cs')._detail:
-            return None
+            raise AttributeError(name)
         _dict = attr(self, '__dict__')
         if 'operands' not in _dict:
             self.__gen_detail()
         if name not in _dict:
-            return None
+            raise AttributeError(name)
         return _dict[name]
 
     # get the last error code
